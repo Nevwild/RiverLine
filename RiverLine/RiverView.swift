@@ -34,6 +34,7 @@ struct RiverEnvironment {
 let riverReducer = Reducer<RiverState, RiverAction, RiverEnvironment> { state, action, environment in
     switch action {
         case .updateButtonTapped:
+            print("updateTapped")
             return environment
                 .stationClient
                 .fetch(12419000)
@@ -41,13 +42,7 @@ let riverReducer = Reducer<RiverState, RiverAction, RiverEnvironment> { state, a
                 .map(RiverAction.stationResponse)
                 .eraseToEffect()
         case let  .stationResponse(.success(station)):
-            state.waves = state.waves
-                    .filter{ wave in
-                        wave.stationId == station.stationId
-                    }
-                    .map{ wave in
-                        Wave(id: wave.id, name: station.dateTime, lastFlow: Int(station.value) ?? wave.lastFlow, surfableRange: wave.surfableRange, stationId: wave.stationId)
-                    }
+            state.stations.append(station)
             return .none
         case .stationResponse(.failure):
             return .none
