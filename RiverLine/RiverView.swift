@@ -61,10 +61,11 @@ struct RiverView: View {
         // TODO: this will require a text
         WithViewStore(self.store) {viewStore in
             VStack{
-                ForEach(viewStore.waves){ wave in
+                ForEach(viewStore.stations){ station in
                     HStack{
-                        Text(wave.name)
-                        Text(String(wave.lastFlow))
+                        Text("\(station.id)")
+                        Text("\(station.value)")
+                        Text("\(station.dateTime)")
                     }
                 }
                 Button("Update") { viewStore.send(.updateButtonTapped) }
@@ -91,9 +92,17 @@ struct RiverView_Previews: PreviewProvider {
                     surfableRange: 2000...4000,
                     stationId: 12419000
                 )
+            ], stations: [
+                Station(
+                    id: 19,
+                    value: "19",
+                    qualifiers: [],
+                    dateTime: "NoTime"
+                )
             ]
+
         ),
         reducer: riverReducer,
-        environment: .init(stationClient: .live)))
+        environment: .init(stationClient: .tca)))
     }
 }
