@@ -28,7 +28,21 @@ extension StationClient {
           }
           .map{//map response to station here
 
-            $0.value.timeSeries.flatMap{$0.values.flatMap{$0.value.compactMap{Station(id: 0, value: $0.value, qualifiers: $0.qualifiers, dateTime: $0.dateTime)}}}.first!
+            $0
+                .value
+                .timeSeries
+                .flatMap{
+                    $0.values.flatMap {
+                        $0.value.compactMap {
+                            Station(id: 0,
+                                    value: $0.value,
+                                    qualifiers: $0.qualifiers,
+                                    dateTime: $0.dateTime
+                            )
+                        }
+                    }
+
+                }.first!
           }
         .mapError { _ in Self.Error() }
         .receive(on: DispatchQueue.main)
