@@ -59,17 +59,23 @@ struct RiverView: View {
 
         // TODO: List of waves with color background based on current status based on flow.
         // TODO: this will require a text
-        WithViewStore(self.store) {viewStore in
-            VStack{
-                ForEach(viewStore.stations){ station in
-                    HStack{
-                        Text("\(station.id)")
-                        Text("\(station.value)")
-                        Text("\(station.dateTime)")
+        WithViewStore(self.store) { viewStore in
+
+            NavigationView{
+                List{
+                    ForEach(viewStore.stations){ station in
+                        HStack{
+                            Text("\(station.id)")
+                            Text("\(station.value)")
+                            Text("\(station.dateTime)")
+                        }
                     }
                 }
-                Button("Update") { viewStore.send(.updateButtonTapped) }
+                .navigationBarTitle("WAVES")
+                .refreshable { viewStore.send(.updateButtonTapped)
+                }
             }
+
         }
     }
 }
@@ -93,16 +99,11 @@ struct RiverView_Previews: PreviewProvider {
                     stationId: 12419000
                 )
             ], stations: [
-                Station(
-                    id: 19,
-                    value: "19",
-                    qualifiers: [],
-                    dateTime: "NoTime"
-                )
+
             ]
 
-        ),
-        reducer: riverReducer,
-        environment: .init(stationClient: .tca)))
+                                           ),
+                        reducer: riverReducer,
+                        environment: .init(stationClient: .tca)))
     }
 }
