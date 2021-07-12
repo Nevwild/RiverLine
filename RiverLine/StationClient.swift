@@ -56,14 +56,16 @@ struct Station: Codable,Equatable, Identifiable {
     let dateTime: String
 }
 
+
+// MARK: - Generated Response Type
 // This file was generated from JSON Schema using quicktype, do not modify it directly.
 // To parse the JSON, add this file to your project and do:
 //
 //   let response = try? newJSONDecoder().decode(Response.self, from: jsonData)
 
-import Foundation
 
-// MARK: - Response
+
+
 struct Response: Codable {
     let name, declaredType, scope: String
     let value: ResponseValue
