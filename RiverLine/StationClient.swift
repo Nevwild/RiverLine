@@ -18,84 +18,35 @@ struct StationClient {
 }
 extension StationClient {
   static let tca = Self(
-    fetch: { number in
+    fetch: { stationId in
 
-      URLSession.shared.dataTaskPublisher(for: URL(string: "https://waterservices.usgs.gov/nwis/iv/?format=json&sites=\(number)&parameterCd=00060&siteStatus=all")!)
+      URLSession.shared.dataTaskPublisher(for: URL(string: "https://waterservices.usgs.gov/nwis/iv/?format=json&sites=\(stationId)&parameterCd=00060&siteStatus=all")!)
           .tryMap { data, response -> Response in
 
             return try JSONDecoder().decode(Response.self, from: data)
 
           }
-          .map{//map response to station here
-
-            $0
-                .value
+          .compactMap{//map response to station here
+              $0.value
                 .timeSeries
                 .flatMap{
                     $0.values.flatMap {
                         $0.value.compactMap {
-                            Station(id: 0,
-                                    value: $0.value,
-                                    qualifiers: $0.qualifiers,
-                                    dateTime: $0.dateTime
+                            Station(
+                                id: stationId,
+                                value: $0.value,
+                                qualifiers: $0.qualifiers,
+                                dateTime: $0.dateTime
                             )
                         }
                     }
-
-                }.first!
+                }.first
           }
         .mapError { _ in Self.Error() }
         .receive(on: DispatchQueue.main)
-          .eraseToEffect()
+        .eraseToEffect()
     }
   )
-    static let mock = Self(
-        fetch: { stationId in
-        [
-            Station(
-                id: 0,
-                value: "6000",
-                qualifiers: [],
-                dateTime: "NoTime"
-            )
-        ]
-            .publisher
-            .mapError{_ in Error()}
-            .eraseToEffect()
-    }
-    )
-    static let swiftCon = Self (
-        fetch: { stationId in
-        [
-            Station(
-                id: 1,
-                value: "6000",
-                qualifiers: [],
-                dateTime: "NoTime"
-            )
-        ]
-            .publisher
-            .mapError{_ in Error()}
-            .eraseToEffect()
-
-    }
-    )
-    static let callback = Self (
-        fetch: { stationId in
-        [
-            Station(
-                id: 2,
-                value: "6000",
-                qualifiers: [],
-                dateTime: "NoTime"
-            )
-        ]
-            .publisher
-            .mapError{_ in Error()}
-            .eraseToEffect()
-
-    }
-    )
 }
 
 struct Station: Codable,Equatable, Identifiable {
