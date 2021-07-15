@@ -7,52 +7,57 @@
 
 import ComposableArchitecture
 import Foundation
-import ScopedJsonDecoder
-import Concurrency
 
+
+struct StationResponse:Equatable {
+    let stations: IdentifiedArrayOf<Station>
+}
 
 struct StationClient {
-  var fetch: (Int) -> Effect<Station, Error>
+    var fetch: ([Wave]) -> Effect<StationResponse, Error>
 
-  struct Error: Swift.Error, Equatable {}
+    struct Error: Swift.Error, Equatable {}
 }
 extension StationClient {
-  static let tca = Self(
-    fetch: { stationId in
+    static let tca = Self(
+        fetch: { waves in
+        print(#function, #line)
+        let stationIds = waves
+            .map{$0.stationId}
+            .map(String.init)
+            .joined(separator: ",")
 
-      URLSession.shared.dataTaskPublisher(for: URL(string: "https://waterservices.usgs.gov/nwis/iv/?format=json&sites=\(stationId)&parameterCd=00060&siteStatus=all")!)
-          .tryMap { data, response -> Response in
-
-            return try JSONDecoder().decode(Response.self, from: data)
-
-          }
-          .compactMap{//map response to station here
-              $0.value
-                .timeSeries
-                .flatMap{
-                    $0.values.flatMap {
-                        $0.value.compactMap {
-                            Station(
-                                id: stationId,
-                                value: $0.value,
-                                qualifiers: $0.qualifiers,
-                                dateTime: $0.dateTime
-                            )
-                        }
-                    }
-                }.first
-          }
-        .mapError { _ in Self.Error() }
-        .receive(on: DispatchQueue.main)
-        .eraseToEffect()
+        return URLSession.shared.dataTaskPublisher(for: URL(string: "https://waterservices.usgs.gov/nwis/iv/?format=json&sites=\(stationIds)&parameterCd=00060&siteStatus=all")!)
+            .tryMap { data, response -> Response in
+                return try JSONDecoder().decode(Response.self, from: data)
+            }
+            .compactMap{ response -> StationResponse in //map response to station here
+                StationResponse(stations: .init(
+                    response.value
+                        .timeSeries
+                        .compactMap{ source in
+                    // TODO: - deal with optionals better
+                    Station(
+                        id: source.sourceInfo.siteCode.compactMap{Int($0.value)}.first ?? 0,
+                        value:  String(source.values.flatMap { $0.value.compactMap {$0.value}}.first ?? ""),
+                        siteName: source.sourceInfo.siteName,
+                        dateTime: (source.values.flatMap { $0.value.compactMap {$0.dateTime}}.first ?? "")
+                    )
+                }
+                )
+                )
+            }
+            .mapError { _ in Self.Error() }
+            .receive(on: DispatchQueue.main)
+            .eraseToEffect()
     }
-  )
+    )
 }
 
 struct Station: Codable,Equatable, Identifiable {
     let id: Int
     let value: String
-    let qualifiers: [String]
+    let siteName: String
     let dateTime: String
 }
 
@@ -81,7 +86,7 @@ struct Response: Codable {
 // MARK: - ResponseValue
 struct ResponseValue: Codable {
     let queryInfo: QueryInfo
-    let timeSeries: [TimeSery]
+    let timeSeries: [TimeSeries]
 }
 
 // MARK: - QueryInfo
@@ -103,10 +108,10 @@ struct Note: Codable {
 }
 
 // MARK: - TimeSery
-struct TimeSery: Codable {
+struct TimeSeries: Codable {
     let sourceInfo: SourceInfo
     let variable: Variable
-    let values: [TimeSeryValue]
+    let values: [TimeSeriesValue]
     let name: String
 }
 
@@ -154,7 +159,7 @@ struct TimeZone: Codable {
 }
 
 // MARK: - TimeSeryValue
-struct TimeSeryValue: Codable {
+struct TimeSeriesValue: Codable {
     let value: [ValueValue]
     let qualifier: [Qualifier]
     let qualityControlLevel: [JSONAny]

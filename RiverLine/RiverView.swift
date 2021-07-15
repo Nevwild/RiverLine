@@ -8,15 +8,6 @@
 import SwiftUI
 import ComposableArchitecture
 
-
-struct Wave:Equatable, Identifiable {
-    let id: UUID
-    let name: String
-    let lastFlow: Int
-    let surfableRange: ClosedRange<Int>
-    let stationId: Int
-}
-
 struct RiverState: Equatable {
     var waves: [Wave]
     var stations: [Station]
@@ -24,7 +15,7 @@ struct RiverState: Equatable {
 
 enum RiverAction: Equatable {
     case refreshGestureCompleted
-    case stationResponse(Result<Station,StationClient.Error>)
+    case stationResponse(Result<StationResponse,StationClient.Error>)
 }
 
 struct RiverEnvironment {
@@ -34,28 +25,26 @@ struct RiverEnvironment {
 let riverReducer = Reducer<RiverState, RiverAction, RiverEnvironment> { state, action, environment in
     switch action {
         case .refreshGestureCompleted:
-            print("RefreshAction")
             return environment
                 .stationClient
-                .fetch(state.waves.last!.stationId)
+                .fetch(state.waves)
                 .catchToEffect()
                 .map(RiverAction.stationResponse)
                 .eraseToEffect()
-        case let  .stationResponse(.success(station)):
-            state.waves = state.waves.map{
-                // I want someting like this
-                // $0.lastFlow.pullback(station.value)
-                station.id == $0.stationId
-                ?
-                Wave(
-                    id: $0.id,
-                    name: $0.name,
-                    lastFlow: Int(station.value)!,
-                    surfableRange: $0.surfableRange,
-                    stationId: $0.stationId
-                )
-                :
-                $0
+        case let  .stationResponse(.success(stationResponse)):
+            state.waves = state.waves.flatMap{ wave in
+                return stationResponse.stations.filter{ station in
+                    wave.stationId == station.id
+                }
+                .map{ station in
+                    Wave(
+                        id: wave.id,
+                        name: wave.name,
+                        lastFlow: Int(station.value) ?? 0,
+                        surfableRange: wave.surfableRange,
+                        stationId: wave.stationId
+                    )
+                }
             }
             return .none
         case .stationResponse(.failure):
@@ -115,6 +104,15 @@ struct RiverView_Previews: PreviewProvider {
             reducer: riverReducer,
             environment: .init(stationClient: .tca)))
     }
+}
+
+
+struct Wave:Equatable, Identifiable {
+    let id: UUID
+    let name: String
+    let lastFlow: Int
+    let surfableRange: ClosedRange<Int>
+    let stationId: Int
 }
 
 extension Wave {

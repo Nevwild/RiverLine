@@ -7,10 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		84024E152680EB2B00F2CB6B /* Concurrency in Frameworks */ = {isa = PBXBuildFile; productRef = 84024E142680EB2B00F2CB6B /* Concurrency */; };
 		84230D58267A46F900FBE96F /* StationClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84230D57267A46F900FBE96F /* StationClient.swift */; };
 		848833AD267D45B40071DBD9 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848833AC267D45B40071DBD9 /* File.swift */; };
-		848833B0267D479D0071DBD9 /* ScopedJsonDecoder in Frameworks */ = {isa = PBXBuildFile; productRef = 848833AF267D479D0071DBD9 /* ScopedJsonDecoder */; };
 		848B4683266D1BB000406EA6 /* RiverLineApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848B4682266D1BB000406EA6 /* RiverLineApp.swift */; };
 		848B4685266D1BB000406EA6 /* RiverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848B4684266D1BB000406EA6 /* RiverView.swift */; };
 		848B4687266D1BB400406EA6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 848B4686266D1BB400406EA6 /* Assets.xcassets */; };
@@ -60,8 +58,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				848B46AF266D1FCD00406EA6 /* ComposableArchitecture in Frameworks */,
-				84024E152680EB2B00F2CB6B /* Concurrency in Frameworks */,
-				848833B0267D479D0071DBD9 /* ScopedJsonDecoder in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -168,8 +164,6 @@
 			name = RiverLine;
 			packageProductDependencies = (
 				848B46AE266D1FCD00406EA6 /* ComposableArchitecture */,
-				848833AF267D479D0071DBD9 /* ScopedJsonDecoder */,
-				84024E142680EB2B00F2CB6B /* Concurrency */,
 			);
 			productName = RiverLIne;
 			productReference = 848B467F266D1BB000406EA6 /* RiverLine.app */;
@@ -244,7 +238,6 @@
 			mainGroup = 848B4676266D1BB000406EA6;
 			packageReferences = (
 				848B46AD266D1FCD00406EA6 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
-				84B04777267C2F630090AB43 /* XCRemoteSwiftPackageReference "ScopedJsonDecoder" */,
 			);
 			productRefGroup = 848B4680266D1BB000406EA6 /* Products */;
 			projectDirPath = "";
@@ -621,25 +614,9 @@
 				minimumVersion = 0.18.0;
 			};
 		};
-		84B04777267C2F630090AB43 /* XCRemoteSwiftPackageReference "ScopedJsonDecoder" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Nevwild/ScopedJsonDecoder";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		84024E142680EB2B00F2CB6B /* Concurrency */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = Concurrency;
-		};
-		848833AF267D479D0071DBD9 /* ScopedJsonDecoder */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = ScopedJsonDecoder;
-		};
 		848B46AE266D1FCD00406EA6 /* ComposableArchitecture */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 848B46AD266D1FCD00406EA6 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
