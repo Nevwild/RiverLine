@@ -71,7 +71,7 @@ struct Station: Codable,Equatable, Identifiable {
 
 
 
-struct Response: Codable {
+fileprivate struct Response: Codable {
     let name, declaredType, scope: String
     let value: ResponseValue
     let responseNil, globalScope, typeSubstituted: Bool
@@ -84,31 +84,31 @@ struct Response: Codable {
 }
 
 // MARK: - ResponseValue
-struct ResponseValue: Codable {
+fileprivate struct ResponseValue: Codable {
     let queryInfo: QueryInfo
     let timeSeries: [TimeSeries]
 }
 
 // MARK: - QueryInfo
-struct QueryInfo: Codable {
+fileprivate struct QueryInfo: Codable {
     let queryURL: String
     let criteria: Criteria
     let note: [Note]
 }
 
 // MARK: - Criteria
-struct Criteria: Codable {
+fileprivate struct Criteria: Codable {
     let locationParam, variableParam: String
     let parameter: [JSONAny]
 }
 
 // MARK: - Note
-struct Note: Codable {
+fileprivate struct Note: Codable {
     let value, title: String
 }
 
 // MARK: - TimeSery
-struct TimeSeries: Codable {
+fileprivate struct TimeSeries: Codable {
     let sourceInfo: SourceInfo
     let variable: Variable
     let values: [TimeSeriesValue]
@@ -116,7 +116,7 @@ struct TimeSeries: Codable {
 }
 
 // MARK: - SourceInfo
-struct SourceInfo: Codable {
+fileprivate struct SourceInfo: Codable {
     let siteName: String
     let siteCode: [SiteCode]
     let timeZoneInfo: TimeZoneInfo
@@ -126,40 +126,40 @@ struct SourceInfo: Codable {
 }
 
 // MARK: - GeoLocation
-struct GeoLocation: Codable {
+fileprivate struct GeoLocation: Codable {
     let geogLocation: GeogLocation
     let localSiteXY: [JSONAny]
 }
 
 // MARK: - GeogLocation
-struct GeogLocation: Codable {
+fileprivate struct GeogLocation: Codable {
     let srs: String
     let latitude, longitude: Double
 }
 
 // MARK: - SiteCode
-struct SiteCode: Codable {
+fileprivate struct SiteCode: Codable {
     let value, network, agencyCode: String
 }
 
 // MARK: - SiteProperty
-struct SiteProperty: Codable {
+fileprivate struct SiteProperty: Codable {
     let value, name: String
 }
 
 // MARK: - TimeZoneInfo
-struct TimeZoneInfo: Codable {
+fileprivate struct TimeZoneInfo: Codable {
     let defaultTimeZone, daylightSavingsTimeZone: TimeZone
     let siteUsesDaylightSavingsTime: Bool
 }
 
 // MARK: - TimeZone
-struct TimeZone: Codable {
+fileprivate struct TimeZone: Codable {
     let zoneOffset, zoneAbbreviation: String
 }
 
 // MARK: - TimeSeryValue
-struct TimeSeriesValue: Codable {
+fileprivate struct TimeSeriesValue: Codable {
     let value: [ValueValue]
     let qualifier: [Qualifier]
     let qualityControlLevel: [JSONAny]
@@ -168,27 +168,27 @@ struct TimeSeriesValue: Codable {
 }
 
 // MARK: - Method
-struct Method: Codable {
+fileprivate struct Method: Codable {
     let methodDescription: String
     let methodID: Int
 }
 
 // MARK: - Qualifier
-struct Qualifier: Codable {
+fileprivate struct Qualifier: Codable {
     let qualifierCode, qualifierDescription: String
     let qualifierID: Int
     let network, vocabulary: String
 }
 
 // MARK: - ValueValue
-struct ValueValue: Codable {
+fileprivate struct ValueValue: Codable {
     let value: String
     let qualifiers: [String]
     let dateTime: String
 }
 
 // MARK: - Variable
-struct Variable: Codable {
+fileprivate struct Variable: Codable {
     let variableCode: [VariableCode]
     let variableName, variableDescription, valueType: String
     let unit: Unit
@@ -200,22 +200,22 @@ struct Variable: Codable {
 }
 
 // MARK: - Options
-struct Options: Codable {
+fileprivate struct Options: Codable {
     let option: [Option]
 }
 
 // MARK: - Option
-struct Option: Codable {
+fileprivate struct Option: Codable {
     let name, optionCode: String
 }
 
 // MARK: - Unit
-struct Unit: Codable {
+fileprivate struct Unit: Codable {
     let unitCode: String
 }
 
 // MARK: - VariableCode
-struct VariableCode: Codable {
+fileprivate struct VariableCode: Codable {
     let value, network, vocabulary: String
     let variableID: Int
     let variableCodeDefault: Bool
@@ -228,7 +228,7 @@ struct VariableCode: Codable {
 
 // MARK: - Encode/decode helpers
 
-class JSONNull: Codable, Hashable {
+fileprivate final class JSONNull: Codable, Hashable {
 
     public static func == (lhs: JSONNull, rhs: JSONNull) -> Bool {
         return true
@@ -257,7 +257,7 @@ class JSONNull: Codable, Hashable {
     }
 }
 
-class JSONCodingKey: CodingKey {
+fileprivate final class JSONCodingKey: CodingKey {
     let key: String
 
     required init?(intValue: Int) {
@@ -277,7 +277,7 @@ class JSONCodingKey: CodingKey {
     }
 }
 
-class JSONAny: Codable {
+fileprivate final class JSONAny: Codable {
 
     let value: Any
 
