@@ -18,36 +18,17 @@ struct StationClient {
 
     struct Error: Swift.Error, Equatable {}
 }
-extension StationClient {
-    static let tca = Self(
-        fetch: { waves in
-        print(#function, #line)
-        let stationIds = waves
-            .map{$0.stationId}
-            .map(String.init)
-            .joined(separator: ",")
 
-        return URLSession.shared.dataTaskPublisher(for: URL(string: "https://waterservices.usgs.gov/nwis/iv/?format=json&sites=\(stationIds)&parameterCd=00060&siteStatus=all")!)
-            .tryMap { data, response -> Response in
-                return try JSONDecoder().decode(Response.self, from: data)
+extension StationClient {
+    static let tca = Self(fetch: { waves in
+        URLSession.shared.dataTaskPublisher(for: waves.stationURL )
+            .tryMap { data, _ -> USGSResponse in
+                try JSONDecoder().decode(USGSResponse.self, from: data)
             }
-            .compactMap{ response -> StationResponse in //map response to station here
-                StationResponse(stations: .init(
-                    response.value
-                        .timeSeries
-                        .compactMap{ source in
-                    // TODO: - deal with optionals better
-                    Station(
-                        id: source.sourceInfo.siteCode.compactMap{Int($0.value)}.first ?? 0,
-                        value:  String(source.values.flatMap { $0.value.compactMap {$0.value}}.first ?? ""),
-                        siteName: source.sourceInfo.siteName,
-                        dateTime: (source.values.flatMap { $0.value.compactMap {$0.dateTime}}.first ?? "")
-                    )
-                }
-                )
-                )
+            .compactMap{ response -> StationResponse in
+                StationResponse(stations: .init(response.stations, id: \.id))
             }
-            .mapError { _ in Self.Error() }
+            .mapError { _ in Self.Error() }//make own enum of errors
             .receive(on: DispatchQueue.main)
             .eraseToEffect()
     }
@@ -56,11 +37,43 @@ extension StationClient {
 
 struct Station: Codable,Equatable, Identifiable {
     let id: Int
-    let value: String
+    let flow: Int
     let siteName: String
     let dateTime: String
 }
 
+extension  Array where Element == Wave {
+    var stationURL: URL {
+        let stationIds = self
+            .map(\.stationId)
+            .map(String.init)
+            .joined(separator: ",")
+
+        return URL(string: "https://waterservices.usgs.gov/nwis/iv/?format=json&sites=\(stationIds)&parameterCd=00060&siteStatus=all"
+        )!
+    }
+}
+
+extension USGSResponse {
+    var stations: [Station] {
+        self.value
+            .timeSeries
+            .compactMap{ source in
+                Station(
+                    id: source.sourceInfo.siteCode.compactMap{Int($0.value)}.first ?? 0,
+                    flow:  source.values.flatMap { $0.value.compactMap {Int($0.value)}}.first ?? 0,
+                    siteName: source.sourceInfo.siteName,
+                    dateTime: (source.values.flatMap { $0.value.compactMap {$0.dateTime}}.first ?? "")
+                )
+            }
+    }
+}
+
+enum USGSStationResponseError: Error {
+    case noStationId
+    case noCfs
+    case noDateTime
+}
 
 // MARK: - Generated Response Type
 // This file was generated from JSON Schema using quicktype, do not modify it directly.
@@ -71,7 +84,7 @@ struct Station: Codable,Equatable, Identifiable {
 
 
 
-fileprivate struct Response: Codable {
+fileprivate struct USGSResponse: Codable {
     let name, declaredType, scope: String
     let value: ResponseValue
     let responseNil, globalScope, typeSubstituted: Bool
@@ -107,7 +120,7 @@ fileprivate struct Note: Codable {
     let value, title: String
 }
 
-// MARK: - TimeSery
+// MARK: - TimeSeries
 fileprivate struct TimeSeries: Codable {
     let sourceInfo: SourceInfo
     let variable: Variable

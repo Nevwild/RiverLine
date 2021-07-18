@@ -13,8 +13,7 @@ struct RiverLineApp: App {
     var body: some Scene {
         WindowGroup{
             RiverView(
-                store:.init(
-                initialState: RiverState(waves: [
+                store: .init( initialState: RiverState(waves: [
                     Wave(
                         id: UUID(),
                         name: "Trailer Park Wave",
@@ -71,10 +70,11 @@ struct RiverLineApp: App {
                         surfableRange: 30000...100000,
                         stationId: 12422500
                     )
-                ], stations: [
+                ],
+                stations: [
                     Station(
                         id: 1,
-                        value: "6000",
+                        flow: 6000,
                         siteName: "site",
                         dateTime: "NoTime"
                     )
