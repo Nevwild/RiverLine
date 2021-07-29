@@ -14,6 +14,8 @@ struct RiverState: Equatable {
 }
 
 enum RiverAction: Equatable {
+    case onAppear
+    case fetchStation
     case refreshGestureCompleted
     case stationResponse(Result<StationResponse,StationClient.Error>)
 }
@@ -24,32 +26,26 @@ struct RiverEnvironment {
 
 let riverReducer = Reducer<RiverState, RiverAction, RiverEnvironment> { state, action, environment in
     switch action {
+        case .onAppear:
+            return Effect(value: RiverAction.fetchStation)
+
         case .refreshGestureCompleted:
+            return Effect(value: RiverAction.fetchStation)
+
+        case .fetchStation:
             return environment
                 .stationClient
                 .fetch(state.waves)
                 .catchToEffect()
                 .map(RiverAction.stationResponse)
                 .eraseToEffect()
+
         case let  .stationResponse(.success(stationResponse)):
-            state.waves = state.waves.flatMap{ wave in
-                return stationResponse.stations.filter{ station in
-                    wave.stationId == station.id
-                }
-                .map{ station in
-                    Wave(
-                        id: wave.id,
-                        name: wave.name,
-                        lastFlow: Int(station.value) ?? 0,
-                        surfableRange: wave.surfableRange,
-                        stationId: wave.stationId
-                    )
-                }
-            }
-            return .none
-        case .stationResponse(.failure):
+            state.waves = state.waves.updateFlow(stationResponse)
             return .none
 
+        case .stationResponse(.failure):
+            return .none
     }
 }
 
@@ -58,19 +54,18 @@ struct RiverView: View {
 
     var body: some View {
 
-        // TODO: List of waves with color background based on current status based on flow.
-        // TODO: this will require a text
         WithViewStore(self.store) { viewStore in
 
             NavigationView{
                 List{
                     ForEach(viewStore.waves){ wave in
-                        WaveView(wave: wave).listRowBackground(wave.surfable() ? Color.green : Color.red)
+                        WaveView(wave: wave)
+                            .listRowBackground(wave.surfable() ? Color.green : Color.red)
                     }
                 }
                 .navigationBarTitle("WAVES")
-                .refreshable { viewStore.send(.refreshGestureCompleted)
-                }
+                .refreshable { viewStore.send(.refreshGestureCompleted) }
+                .onAppear { viewStore.send(.onAppear) }
             }
 
         }
@@ -79,26 +74,27 @@ struct RiverView: View {
 
 struct RiverView_Previews: PreviewProvider {
     static var previews: some View {
-        RiverView(store:
-            .init(initialState: .init(
-                waves: [
-                    Wave(
-                        id: UUID(),
-                        name: "Trailer Park Wave",
-                        lastFlow: 00000,
-                        surfableRange: 4000...7000,
-                        stationId: 12419000
-                    ),
-                    Wave(
-                        id: UUID(),
-                        name: "Mini-Climax",
-                        lastFlow: 00000,
-                        surfableRange: 1000...4000,
-                        stationId: 12422500
-                    )
-                ], stations: [
+        RiverView(
+            store:
+                .init(initialState: .init(
+                    waves: [
+                        Wave(
+                            id: UUID(),
+                            name: "Trailer Park Wave",
+                            lastFlow: 4005,
+                            surfableRange: 4000...7000,
+                            stationId: 12419000
+                        ),
+                        Wave(
+                            id: UUID(),
+                            name: "Mini-Climax",
+                            lastFlow: 00000,
+                            surfableRange: 1000...4000,
+                            stationId: 12422500
+                        )
+                    ], stations: [
 
-                ]
+                    ]
 
             ),
             reducer: riverReducer,
@@ -118,6 +114,20 @@ struct Wave:Equatable, Identifiable {
 extension Wave {
     func surfable() -> Bool{
         self.surfableRange.contains(lastFlow)
+    }
+}
+
+extension Array where Element == Wave {
+    func updateFlow(_ stationResponse: StationResponse) -> [Wave] {
+        self.map{ wave in
+            Wave(
+                id: wave.id,
+                name: wave.name,
+                lastFlow: stationResponse.stations[id: wave.stationId]?.flow ?? wave.lastFlow,
+                surfableRange: wave.surfableRange,
+                stationId: wave.stationId
+            )
+        }
     }
 }
 
