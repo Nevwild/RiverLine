@@ -4,18 +4,19 @@
 //
 //  Created by Nevill Wilder on 6/6/21.
 //
-
+import Combine
 import SwiftUI
 import ComposableArchitecture
 
 struct RiverState: Equatable {
     var waves: [Wave]
+    var isLoading: Bool
 }
 
 enum RiverAction: Equatable {
     case onAppear
     case fetchFlows
-    case refreshGestureCompleted
+    case refresh
     case stationResponse(Result<StationResponse,StationClient.Error>)
 }
 
@@ -28,7 +29,8 @@ let riverReducer = Reducer<RiverState, RiverAction, RiverEnvironment> { state, a
         case .onAppear:
             return Effect(value: RiverAction.fetchFlows)
 
-        case .refreshGestureCompleted:
+        case .refresh:
+            state.isLoading = true
             return Effect(value: RiverAction.fetchFlows)
 
         case .fetchFlows:
@@ -40,6 +42,7 @@ let riverReducer = Reducer<RiverState, RiverAction, RiverEnvironment> { state, a
                 .eraseToEffect()
 
         case let  .stationResponse(.success(stationResponse)):
+            state.isLoading = false
             state.waves = state.waves.updateFlow(stationResponse)
             return .none
 
@@ -63,14 +66,17 @@ struct RiverView: View {
                                 wave.surfable() ? Color.green : Color.red
                             )
                             .onTapGesture {
-
                                 print("tapped \(wave.name)")
                             }
                     }
                 }
                 .navigationBarTitle("WAVES")
-                .refreshable { viewStore.send(.refreshGestureCompleted) }
-                .onAppear { viewStore.send(.onAppear) }
+                .refreshable {
+                    await viewStore.send(.refresh, while: \.isLoading)
+                }
+                .onAppear {
+                    viewStore.send(.onAppear)
+                }
             }
 
         }
@@ -97,7 +103,8 @@ struct RiverView_Previews: PreviewProvider {
                             surfableRange: 100...4000,
                             stationId: 12422500
                         )
-                    ]
+                    ],
+                    isLoading: false
             ),
             reducer: riverReducer,
             environment: .init(stationClient: .tca)))
@@ -147,3 +154,21 @@ struct WaveView:View{
     }
 }
 
+extension ViewStore {
+  func send(
+    _ action: Action,
+    while predicate: @escaping (State) -> Bool
+  ) async {
+    self.send(action)
+    await withUnsafeContinuation { (continuation: UnsafeContinuation<Void, Never>) in
+      var cancellable: Cancellable?
+      cancellable = self.publisher
+        .filter { !predicate($0) }
+        .prefix(1)
+        .sink { _ in
+          continuation.resume()
+          _ = cancellable
+        }
+    }
+  }
+}
