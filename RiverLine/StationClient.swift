@@ -12,9 +12,9 @@ import Foundation
 struct StationResponse:Equatable {
     let stations: IdentifiedArrayOf<Station>
 }
-
+typealias StationID = Int
 struct StationClient {
-    var fetch: ([Wave]) -> Effect<StationResponse, Error>
+    var fetch: ([StationID]) -> Effect<StationResponse, Error>
 
     struct Error: Swift.Error, Equatable {}
 }
@@ -36,20 +36,15 @@ extension StationClient {
 }
 
 struct Station: Codable,Equatable, Identifiable {
-    let id: Int
+    let id: StationID
     let flow: Int
     let siteName: String
     let dateTime: String
 }
 
-extension  Array where Element == Wave {
+extension Array where Element == StationID {
     var stationURL: URL {
-        let stationIds = self
-            .map(\.stationId)
-            .map(String.init)
-            .joined(separator: ",")
-
-        return URL(string: "https://waterservices.usgs.gov/nwis/iv/?format=json&sites=\(stationIds)&parameterCd=00060&siteStatus=all"
+        URL(string: "https://waterservices.usgs.gov/nwis/iv/?format=json&sites=\(self.map(String.init).joined(separator: ","))&parameterCd=00060&siteStatus=all"
         )!
     }
 }
@@ -61,7 +56,7 @@ extension USGSResponse {
             .compactMap{ source in
                 Station(
                     id: source.sourceInfo.siteCode.compactMap{Int($0.value)}.first ?? 0,
-                    flow:  source.values.flatMap { $0.value.compactMap {Int($0.value)}}.first ?? 0,
+                    flow: source.values.flatMap { $0.value.compactMap {Int($0.value)}}.first ?? 0,
                     siteName: source.sourceInfo.siteName,
                     dateTime: (source.values.flatMap { $0.value.compactMap {$0.dateTime}}.first ?? "")
                 )

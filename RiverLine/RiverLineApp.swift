@@ -70,16 +70,8 @@ struct RiverLineApp: App {
                         surfableRange: 30000...100000,
                         stationId: 12422500
                     )
-                ],
-                stations: [
-                    Station(
-                        id: 1,
-                        flow: 6000,
-                        siteName: "site",
-                        dateTime: "NoTime"
-                    )
                 ]
-                  ),
+            ),
                 reducer: riverReducer,
                 environment: .init(stationClient: .tca)
                 )

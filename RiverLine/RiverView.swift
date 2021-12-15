@@ -10,12 +10,11 @@ import ComposableArchitecture
 
 struct RiverState: Equatable {
     var waves: [Wave]
-    var stations: [Station]
 }
 
 enum RiverAction: Equatable {
     case onAppear
-    case fetchStation
+    case fetchFlows
     case refreshGestureCompleted
     case stationResponse(Result<StationResponse,StationClient.Error>)
 }
@@ -27,15 +26,15 @@ struct RiverEnvironment {
 let riverReducer = Reducer<RiverState, RiverAction, RiverEnvironment> { state, action, environment in
     switch action {
         case .onAppear:
-            return Effect(value: RiverAction.fetchStation)
+            return Effect(value: RiverAction.fetchFlows)
 
         case .refreshGestureCompleted:
-            return Effect(value: RiverAction.fetchStation)
+            return Effect(value: RiverAction.fetchFlows)
 
-        case .fetchStation:
+        case .fetchFlows:
             return environment
                 .stationClient
-                .fetch(state.waves)
+                .fetch(state.waves.stationIds)
                 .catchToEffect()
                 .map(RiverAction.stationResponse)
                 .eraseToEffect()
@@ -60,7 +59,13 @@ struct RiverView: View {
                 List{
                     ForEach(viewStore.waves){ wave in
                         WaveView(wave: wave)
-                            .listRowBackground(wave.surfable() ? Color.green : Color.red)
+                            .listRowBackground(
+                                wave.surfable() ? Color.green : Color.red
+                            )
+                            .onTapGesture {
+
+                                print("tapped \(wave.name)")
+                            }
                     }
                 }
                 .navigationBarTitle("WAVES")
@@ -87,15 +92,12 @@ struct RiverView_Previews: PreviewProvider {
                         ),
                         Wave(
                             id: UUID(),
-                            name: "Mini-Climax",
+                            name: "BlobWave",
                             lastFlow: 00000,
-                            surfableRange: 1000...4000,
+                            surfableRange: 100...4000,
                             stationId: 12422500
                         )
-                    ], stations: [
-
                     ]
-
             ),
             reducer: riverReducer,
             environment: .init(stationClient: .tca)))
@@ -118,6 +120,9 @@ extension Wave {
 }
 
 extension Array where Element == Wave {
+
+    var stationIds: [StationID] { self.map(\.stationId) }
+
     func updateFlow(_ stationResponse: StationResponse) -> [Wave] {
         self.map{ wave in
             Wave(
@@ -141,3 +146,4 @@ struct WaveView:View{
         }
     }
 }
+
