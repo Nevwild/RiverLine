@@ -8,37 +8,37 @@ import Combine
 import SwiftUI
 import ComposableArchitecture
 
-struct RiverState: Equatable {
+struct WaveConditionState: Equatable {
     var waves: [Wave]
     var isLoading: Bool
 }
 
-enum RiverAction: Equatable {
+enum WaveConditionAction: Equatable {
     case onAppear
     case fetchFlows
     case refresh
     case stationResponse(Result<StationResponse,StationClient.Error>)
 }
 
-struct RiverEnvironment {
+struct WaveConditionEnvironment {
     let stationClient: StationClient
 }
 
-let riverReducer = Reducer<RiverState, RiverAction, RiverEnvironment> { state, action, environment in
+let waveConditionReducer = Reducer<WaveConditionState, WaveConditionAction, WaveConditionEnvironment> { state, action, environment in
     switch action {
         case .onAppear:
-            return Effect(value: RiverAction.fetchFlows)
+            return Effect(value: WaveConditionAction.fetchFlows)
 
         case .refresh:
             state.isLoading = true
-            return Effect(value: RiverAction.fetchFlows)
+            return Effect(value: WaveConditionAction.fetchFlows)
 
         case .fetchFlows:
             return environment
                 .stationClient
                 .fetch(state.waves.stationIds)
                 .catchToEffect()
-                .map(RiverAction.stationResponse)
+                .map(WaveConditionAction.stationResponse)
                 .eraseToEffect()
 
         case let  .stationResponse(.success(stationResponse)):
@@ -51,8 +51,8 @@ let riverReducer = Reducer<RiverState, RiverAction, RiverEnvironment> { state, a
     }
 }
 
-struct RiverView: View {
-    let store: Store<RiverState, RiverAction>
+struct WaveConditionView: View {
+    let store: Store<WaveConditionState, WaveConditionAction>
 
     var body: some View {
 
@@ -60,10 +60,14 @@ struct RiverView: View {
 
             NavigationView{
                 List{
-                    ForEach(viewStore.waves){ wave in
+                    ForEach(
+                        viewStore.waves
+                            .sorted{ $0.condition().rawValue > $1.condition().rawValue }
+                    )
+                    { wave in
                         WaveView(wave: wave)
                             .listRowBackground(
-                                wave.surfable() ? Color.green : Color.red
+                                wave.condition().color
                             )
                             .onTapGesture {
                                 print("tapped \(wave.name)")
@@ -83,31 +87,41 @@ struct RiverView: View {
     }
 }
 
-struct RiverView_Previews: PreviewProvider {
+struct WaveConditionView_Previews: PreviewProvider {
     static var previews: some View {
-        RiverView(
+        WaveConditionView(
             store:
                 .init(initialState: .init(
                     waves: [
                         Wave(
                             id: UUID(),
                             name: "Trailer Park Wave",
+                            river: "Spokane",
                             lastFlow: 4005,
-                            surfableRange: 4000...7000,
+                            surfableRange: [4000...7000],
+                            fairRange: [],
+                            goodRange: [],
+                            epicRange: [],
+                            dangerRange: [],
                             stationId: 12419000
                         ),
                         Wave(
                             id: UUID(),
                             name: "BlobWave",
+                            river: "Spokane",
                             lastFlow: 00000,
-                            surfableRange: 100...4000,
+                            surfableRange: [100...4000],
+                            fairRange: [],
+                            goodRange: [],
+                            epicRange: [],
+                            dangerRange: [],
                             stationId: 12422500
                         )
                     ],
                     isLoading: false
             ),
-            reducer: riverReducer,
-            environment: .init(stationClient: .tca)))
+            reducer: waveConditionReducer,
+            environment: .init(stationClient: .live)))
     }
 }
 
@@ -115,17 +129,55 @@ struct RiverView_Previews: PreviewProvider {
 struct Wave:Equatable, Identifiable {
     let id: UUID
     let name: String
+    let river: String 
     let lastFlow: Int
-    let surfableRange: ClosedRange<Int>
+    let surfableRange: [ClosedRange<Int>]
+    let fairRange: [ClosedRange<Int>]
+    let goodRange: [ClosedRange<Int>]
+    let epicRange: [ClosedRange<Int>]
+    let dangerRange: [ClosedRange<Int>]
     let stationId: Int
-}
 
-extension Wave {
-    func surfable() -> Bool{
-        self.surfableRange.contains(lastFlow)
+    enum Condition: Int {
+        case flat
+        case surfable
+        case fair
+        case good
+        case epic
     }
 }
 
+
+extension Wave {
+    func surfable() -> Bool{
+        !self.surfableRange.filter{$0.contains(lastFlow)}.isEmpty
+    }
+    func condition() -> Condition {
+        !epicRange.filter{$0.contains(lastFlow)}.isEmpty ? .epic
+        : !goodRange.filter{$0.contains(lastFlow)}.isEmpty ? .good
+        : !fairRange.filter{$0.contains(lastFlow)}.isEmpty ? .fair
+        : !surfableRange.filter{$0.contains(lastFlow)}.isEmpty ? .surfable
+        : .flat
+    }
+}
+
+extension Wave.Condition{
+    var color: Color {
+        switch self{
+            case .surfable:
+                return .cyan
+            case .fair:
+                return .blue
+            case .good:
+                return .green
+            case .epic:
+                return .orange
+            case .flat:
+                return .gray
+        }
+    }
+
+}
 extension Array where Element == Wave {
 
     var stationIds: [StationID] { self.map(\.stationId) }
@@ -135,8 +187,13 @@ extension Array where Element == Wave {
             Wave(
                 id: wave.id,
                 name: wave.name,
+                river: wave.river,
                 lastFlow: stationResponse.stations[id: wave.stationId]?.flow ?? wave.lastFlow,
                 surfableRange: wave.surfableRange,
+                fairRange: wave.fairRange,
+                goodRange: wave.goodRange,
+                epicRange: wave.epicRange,
+                dangerRange: wave.dangerRange,
                 stationId: wave.stationId
             )
         }
@@ -150,6 +207,9 @@ struct WaveView:View{
         HStack{
             Text("\(wave.name)")
             Text("\(wave.lastFlow)")
+            if !wave.dangerRange.filter{$0.contains(wave.lastFlow)}.isEmpty { Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundColor(.red)
+            }
         }
     }
 }

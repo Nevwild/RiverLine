@@ -8,14 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		84230D58267A46F900FBE96F /* StationClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84230D57267A46F900FBE96F /* StationClient.swift */; };
-		848833AD267D45B40071DBD9 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848833AC267D45B40071DBD9 /* File.swift */; };
 		848B4683266D1BB000406EA6 /* RiverLineApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848B4682266D1BB000406EA6 /* RiverLineApp.swift */; };
-		848B4685266D1BB000406EA6 /* RiverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848B4684266D1BB000406EA6 /* RiverView.swift */; };
+		848B4685266D1BB000406EA6 /* WaveConditionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848B4684266D1BB000406EA6 /* WaveConditionView.swift */; };
 		848B4687266D1BB400406EA6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 848B4686266D1BB400406EA6 /* Assets.xcassets */; };
 		848B468A266D1BB400406EA6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 848B4689266D1BB400406EA6 /* Preview Assets.xcassets */; };
 		848B4695266D1BB500406EA6 /* RiverLineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848B4694266D1BB500406EA6 /* RiverLineTests.swift */; };
 		848B46A0266D1BB500406EA6 /* RiverLineUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848B469F266D1BB500406EA6 /* RiverLineUITests.swift */; };
 		848B46AF266D1FCD00406EA6 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 848B46AE266D1FCD00406EA6 /* ComposableArchitecture */; };
+		849E75252826CF76008DE203 /* CodableHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849E75242826CF76008DE203 /* CodableHelpers.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,10 +37,9 @@
 
 /* Begin PBXFileReference section */
 		84230D57267A46F900FBE96F /* StationClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationClient.swift; sourceTree = "<group>"; };
-		848833AC267D45B40071DBD9 /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = File.swift; path = ../RiverLine/File.swift; sourceTree = "<group>"; };
 		848B467F266D1BB000406EA6 /* RiverLine.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RiverLine.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		848B4682266D1BB000406EA6 /* RiverLineApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RiverLineApp.swift; sourceTree = "<group>"; };
-		848B4684266D1BB000406EA6 /* RiverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RiverView.swift; sourceTree = "<group>"; };
+		848B4684266D1BB000406EA6 /* WaveConditionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveConditionView.swift; sourceTree = "<group>"; };
 		848B4686266D1BB400406EA6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		848B4689266D1BB400406EA6 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		848B468B266D1BB400406EA6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -50,6 +49,7 @@
 		848B469B266D1BB500406EA6 /* RiverLineUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RiverLineUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		848B469F266D1BB500406EA6 /* RiverLineUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RiverLineUITests.swift; sourceTree = "<group>"; };
 		848B46A1266D1BB500406EA6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		849E75242826CF76008DE203 /* CodableHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableHelpers.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,7 +88,7 @@
 		848B4676266D1BB000406EA6 = {
 			isa = PBXGroup;
 			children = (
-				848833AC267D45B40071DBD9 /* File.swift */,
+				84D6762827DCE37A0033E2F5 /* Packages */,
 				848B4681266D1BB000406EA6 /* RiverLine */,
 				848B4693266D1BB500406EA6 /* RiverLIneTests */,
 				848B469E266D1BB500406EA6 /* RiverLIneUITests */,
@@ -111,8 +111,9 @@
 			isa = PBXGroup;
 			children = (
 				848B4682266D1BB000406EA6 /* RiverLineApp.swift */,
-				848B4684266D1BB000406EA6 /* RiverView.swift */,
+				848B4684266D1BB000406EA6 /* WaveConditionView.swift */,
 				84230D57267A46F900FBE96F /* StationClient.swift */,
+				849E75242826CF76008DE203 /* CodableHelpers.swift */,
 				848B4686266D1BB400406EA6 /* Assets.xcassets */,
 				848B468B266D1BB400406EA6 /* Info.plist */,
 				848B4688266D1BB400406EA6 /* Preview Content */,
@@ -144,6 +145,13 @@
 				848B46A1266D1BB500406EA6 /* Info.plist */,
 			);
 			path = RiverLIneUITests;
+			sourceTree = "<group>";
+		};
+		84D6762827DCE37A0033E2F5 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Packages;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -227,7 +235,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 848B467A266D1BB000406EA6 /* Build configuration list for PBXProject "RiverLIne" */;
+			buildConfigurationList = 848B467A266D1BB000406EA6 /* Build configuration list for PBXProject "RiverLine" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -281,9 +289,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				849E75252826CF76008DE203 /* CodableHelpers.swift in Sources */,
 				84230D58267A46F900FBE96F /* StationClient.swift in Sources */,
-				848833AD267D45B40071DBD9 /* File.swift in Sources */,
-				848B4685266D1BB000406EA6 /* RiverView.swift in Sources */,
+				848B4685266D1BB000406EA6 /* WaveConditionView.swift in Sources */,
 				848B4683266D1BB000406EA6 /* RiverLineApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -567,7 +575,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		848B467A266D1BB000406EA6 /* Build configuration list for PBXProject "RiverLIne" */ = {
+		848B467A266D1BB000406EA6 /* Build configuration list for PBXProject "RiverLine" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				848B46A2266D1BB500406EA6 /* Debug */,

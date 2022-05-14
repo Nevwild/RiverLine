@@ -11,15 +11,6 @@
         }
       },
       {
-        "package": "ScopedJsonDecoder",
-        "repositoryURL": "https://github.com/Nevwild/ScopedJsonDecoder",
-        "state": {
-          "branch": null,
-          "revision": "833cf03d64ed71f7da6dd6d90637981bb35e5b05",
-          "version": "1.0.1"
-        }
-      },
-      {
         "package": "swift-case-paths",
         "repositoryURL": "https://github.com/pointfreeco/swift-case-paths",
         "state": {
